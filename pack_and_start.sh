@@ -4,4 +4,4 @@ npm run build
 cp dist/main.css ../../public
 cp dist/main.mjs ../../public
 cd ../../
-node ./public/main.mjs
+wasmedge --dir .:. wasmedge_quickjs.wasm ./public/main.mjs
