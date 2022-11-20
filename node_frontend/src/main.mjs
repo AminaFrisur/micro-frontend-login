@@ -1,15 +1,13 @@
 import * as React from 'react';
 // https://reactjs.org/docs/react-dom-server.html#rendertopipeablestream
 import {renderToPipeableStream} from 'react-dom/server';
-import { createServer } from 'http';
+import { createServer, request } from 'http';
 import {parseFormData} from'./api/parseFormData.js'
-import fs from 'fs';
-
+import * as std from 'std';
 import Login from './component/Login.jsx';
-const css = fs.readFileSync("./public/main.css");
+const css = std.loadFile('./public/main.css')
 
 createServer(async (req, res) => {
-
     console.log("Login Micro-Frontend: New Request incoming");
     console.log("Login Micro-Frontend: Url is: " + req.url);
     console.log("Login Micro-Frontend: Request Method is: " + req.method);
@@ -22,9 +20,11 @@ createServer(async (req, res) => {
     } else if (req.url == '/login' && req.method.toUpperCase() === "GET") {
         res.setHeader('Content-type', 'text/html');
         renderToPipeableStream(<Login />).pipe(res);
+        console.log("gkjhdrkghkjedhrhgjkhrd");
     } else if (req.url == '/login' && req.method.toUpperCase() === "POST") {
-            console.log(await parseFormData(req));
-        renderToPipeableStream(<div><p>Login Parsing war Erfolgreich</p></div>).pipe(res);
+        // FUNKTIONIERT LEIDER AKTUELL NICHT !
+        // console.log(await parseFormData(req));
+        const stream = renderToPipeableStream(<div><p>Login Parsing war Erfolgreich</p></div>, {onShellReady: () => {stream.pipe(res)}, onShellError: (e) => {print('onShellError:', e)}});
     } else {
         res.setHeader('Content-type', 'text/html');
         renderToPipeableStream(<div><p>Login Frontend: Route not found</p></div>).pipe(res);
