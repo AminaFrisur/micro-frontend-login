@@ -9,7 +9,6 @@ let assets = {
     'main.css': '/main.css',
 };
 
-
 class Login extends React.Component {
 
     constructor(props) {

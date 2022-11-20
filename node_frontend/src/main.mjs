@@ -21,13 +21,10 @@ createServer(async (req, res) => {
         res.end()
     } else if (req.url == '/login' && req.method.toUpperCase() === "GET") {
         res.setHeader('Content-type', 'text/html');
-        console.log("Test12345")
         renderToPipeableStream(<Login />).pipe(res);
-
-
     } else if (req.url == '/login' && req.method.toUpperCase() === "POST") {
-            console.log(parseFormData(req));
-            renderToPipeableStream(<Login></Login>).pipe(res);
+            console.log(await parseFormData(req));
+        renderToPipeableStream(<div><p>Login Parsing war Erfolgreich</p></div>).pipe(res);
     } else {
         res.setHeader('Content-type', 'text/html');
         renderToPipeableStream(<div><p>Login Frontend: Route not found</p></div>).pipe(res);
