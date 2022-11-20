@@ -1,0 +1,34 @@
+{
+  "name": "micro-frontend-wasm-test",
+  "version": "1.0.0",
+  "description": "Micro-frontent Testen mit WebAssembly",
+  "main": "main.mjs",
+  "type": "module",
+  "scripts": {
+    "build": "rollup -c rollup.config.js",
+    "start": "node main.mjs"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.16.5",
+    "@babel/preset-env": "^7.16.5",
+    "@babel/preset-react": "^7.16.5",
+    "@rollup/plugin-babel": "^5.3.0",
+    "@rollup/plugin-commonjs": "^21.0.1",
+    "@rollup/plugin-node-resolve": "^7.1.3",
+    "@rollup/plugin-replace": "^3.0.0",
+    "rollup": "^2.60.1",
+    "rollup-plugin-async": "^1.2.0",
+    "rollup-plugin-babel": "^4.4.0",
+    "rollup-plugin-node-builtins": "^2.1.2",
+    "rollup-plugin-node-globals": "^1.4.0"
+  },
+  "dependencies": {
+    "bootstrap": "^5.2.2",
+    "react-bootstrap": "^2.6.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "rollup-plugin-css-bundle": "^1.0.4"
+  },
+  "author": "Tim Hoeffner",
+  "license": "ISC"
+}
