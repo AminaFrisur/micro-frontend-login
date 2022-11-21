@@ -1,33 +1,41 @@
-const { babel } = require('@rollup/plugin-babel');
+const {babel} = require('@rollup/plugin-babel');
 const nodeResolve = require('@rollup/plugin-node-resolve');
 const commonjs = require('@rollup/plugin-commonjs');
 const replace = require('@rollup/plugin-replace');
 
 const globals = require('rollup-plugin-node-globals');
+// const builtins = require('rollup-plugin-node-builtins');
 const plugin_async = require('rollup-plugin-async');
-import cssbundle from 'rollup-plugin-css-bundle';
-
+const css = require("rollup-plugin-import-css");
+const svg = require('rollup-plugin-svg');
 
 const babelOptions = {
-    'presets': ['@babel/preset-react']
+    babelrc: false,
+    presets: [
+        '@babel/preset-react'
+    ],
+    babelHelpers: 'bundled'
 };
 
 module.exports = [
     {
-        input: './main.mjs',
+        input: './server/index.js',
         output: {
-            inlineDynamicImports: true,
-            file: 'dist/main.mjs',
+            file: 'server-build/index.js',
             format: 'esm',
         },
+        external: [ 'std', 'wasi_net','wasi_http'],
         plugins: [
             plugin_async(),
-            nodeResolve(),
-            commonjs({ ignoreDynamicRequires: false }),
             babel(babelOptions),
+            nodeResolve({preferBuiltins: true}),
+            commonjs({ignoreDynamicRequires: false}),
+            css(),
+            svg({base64: true}),
             globals(),
-            cssbundle(),
+            // builtins(),
             replace({
+                preventAssignment: true,
                 'process.env.NODE_ENV': JSON.stringify('production'),
                 'process.env.NODE_DEBUG': JSON.stringify(''),
             }),

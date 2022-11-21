@@ -1,13 +1,13 @@
-import React, { Suspense } from 'react';
+import React from 'react';
 import {Form, Alert, Col, Row } from 'react-bootstrap';
 // import {makeRequest} from "../api/httpClient.mjs";
-import ButtonLoader from "./ButtonLoader.jsx";
-import 'bootstrap/dist/css/bootstrap.min.css';
+import ButtonLoader from './ButtonLoader.js'
 
 let assets = {
     'main.js': '/main.js',
     'main.css': '/main.css',
 };
+
 
 class Login extends React.Component {
 
@@ -25,9 +25,6 @@ class Login extends React.Component {
     }
 
     render() {
-        // Komponente wird erst geladen wenn wirklich gebraucht wird
-        // https://blog.loginradius.com/engineering/lazy-loading-in-react
-        // let LazyPage1 = React.lazy(() => loadLazyPage());
         return (
             <html lang="en">
             <head>
@@ -38,19 +35,19 @@ class Login extends React.Component {
             <body>
             <div>
                 <h1>Login into application</h1>
-                <Form action="http://localhost:8001/login"
-                      method="POST">
+                <Form action="http://localhost:8002/login"
+                      method="post">
 
                     <Form.Group as={Row}>
                         <Col md="4">
                             <Form.Label>Login Name</Form.Label>
-                            <Form.Control type="text" name="loginName" placeholder="Bitte geben Sie ihren Login Namen ein" onChange={this.textChangeHandler} />
+                            <Form.Control type="text" name="loginName" placeholder="Bitte geben Sie ihren Login Namen ein"/>
                         </Col>
                     </Form.Group>
                     <Form.Group as={Row}>
                         <Col md="4">
                             <Form.Label>Password</Form.Label>
-                            <Form.Control type="password" name="password" placeholder="Bitte geben Sie ihr Passwort ein" onChange={this.textChangeHandler} />
+                            <Form.Control type="password" name="password" placeholder="Bitte geben Sie ihr Passwort ein"/>
                         </Col>
                     </Form.Group>
                     <Form.Group as={Row}>
