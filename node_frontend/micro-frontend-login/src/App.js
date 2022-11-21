@@ -1,6 +1,5 @@
 import './App.css';
 import React from 'react';
-import Login from './components/Login';
 
 let assets = {
     'main.js': '/main.js',

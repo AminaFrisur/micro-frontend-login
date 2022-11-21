@@ -3,7 +3,7 @@ import ReactDOMServer from 'react-dom/server';
 import * as std from 'std';
 import * as http from 'wasi_http';
 import * as net from 'wasi_net';
-import {parseFormLoginData} from '../src/ApiHelper.js'
+import {parseFormLoginData, makePostRequest} from '../src/ApiHelper.js'
 
 // import App from '../src/App.js';
 import Login from '../src/components/Login.js'
@@ -49,8 +49,15 @@ async function handle_req(s, req, parameter) {
         content = content.replace('<div id="root"></div>', `<div id="root">${app}</div>`);
     } else if (req.uri == '/login' && req.method.toUpperCase() === "POST") {
         // in diesem Fall versucht sich der User anzumelden
-        parseFormLoginData(parameter);
-        content = content.replace('<div id="root"></div>', `<div id="root">Anmeldung ist erfolgreich gewesen</div>`);
+        content = std.loadFile('./build/index.html');
+        let loginData = parseFormLoginData(parameter);
+        let response = await makePostRequest(loginData, { 'Content-Type': 'application/json'}, "localhost", "8000", "/login");
+        if(response) {
+            content = content.replace('<div id="root"></div>', `<div id="root"><p>Anmeldung ist erfolgreich gewesen</p></div>`);
+        } else {
+            const app = ReactDOMServer.renderToString(<Login error="true" />);
+            content = content.replace('<div id="root"></div>', `<div id="root">${app}</div>`);
+        }
     }
 
     else {
