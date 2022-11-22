@@ -3,10 +3,11 @@ import ReactDOMServer from 'react-dom/server';
 import * as std from 'std';
 import * as http from 'wasi_http';
 import * as net from 'wasi_net';
-import {parseFormLoginData, makePostRequest} from '../src/ApiHelper.js'
+import {parseFormLoginData, makePostRequest, parseFormRegisterData} from '../src/ApiHelper.js'
 
 // import App from '../src/App.js';
 import Login from '../src/components/Login.js'
+import Register from '../src/components/Register.js'
 
 async function handle_client(cs) {
     let buffer = new http.Buffer();
@@ -43,10 +44,12 @@ async function handle_req(s, req, parameter) {
 
     let resp = new http.WasiResponse();
     let content = '';
+
     if (req.uri == '/login' && req.method.toUpperCase() === "GET") {
         const app = ReactDOMServer.renderToString(<Login />);
         content = std.loadFile('./build/index.html');
         content = content.replace('<div id="root"></div>', `<div id="root">${app}</div>`);
+
     } else if (req.uri == '/login' && req.method.toUpperCase() === "POST") {
         // in diesem Fall versucht sich der User anzumelden
         content = std.loadFile('./build/index.html');
@@ -58,6 +61,32 @@ async function handle_req(s, req, parameter) {
             const app = ReactDOMServer.renderToString(<Login error="true" />);
             content = content.replace('<div id="root"></div>', `<div id="root">${app}</div>`);
         }
+
+    } else if (req.uri == '/register' && req.method.toUpperCase() === "GET") {
+        const app = ReactDOMServer.renderToString(<Register />);
+        content = std.loadFile('./build/index.html');
+        content = content.replace('<div id="root"></div>', `<div id="root">${app}</div>`);
+
+    } else if (req.uri == '/register' && req.method.toUpperCase() === "POST") {
+        let registerData = parseFormRegisterData(parameter);
+        let check = registerData.password == registerData.passwordRepition;
+        let app;
+        // Passwort
+        if(!check) {
+            app = ReactDOMServer.renderToString(<Register error="true" errorMessage="Passwörter stimmen nich übernein. Bitte noch einmal überprüfen!" />);
+        } else {
+
+            // Post Request zur Benutzerverwaltung
+            let response = await makePostRequest(registerData, { 'Content-Type': 'application/json'}, "localhost", "8000", "/register");
+            if (response) {
+                app = ReactDOMServer.renderToString(<Register success="true" />);
+            } else {
+                app = ReactDOMServer.renderToString(<Register success="true" errorMessage="Registrierung fehlgeschlagen!"/>);
+            }
+
+        }
+        content = std.loadFile('./build/index.html');
+        content = content.replace('<div id="root"></div>', `<div id="root">${app}</div>`);
     }
 
     else {

@@ -21,3 +21,8 @@ Stand 21.11.2022:
 - let s = await net.WasiTcpConn.connect(addr) Zeile 207 in der HTTP Lib von WasmEdge
 - Obwohl anscheinen ein Fehler auftritt, kommt kein Fehler zurück und der Fetch wird ohne Rückmeldung abgebrochen
 - Unter der Trip Komponente hat es aber komischerweise funktioniert
+- LÄUFT JETZT!!!
+- const response = await resp.text(); -> in fetch request
+- Diese Zeile führt dazu das es langsam ist
+- Warum auch immer
+- 
