@@ -24,10 +24,10 @@ export function  parseFormRegisterData(stringDataRaw) {
   let loginName = stringDataRaw.substring(positionLogin1, positionLogin2);
 
   let positionPassword1 = positionLogin2 + "&password=".length;
-  let positionPassword2 = stringDataRaw.search("&passwordrepetition=");
+  let positionPassword2 = stringDataRaw.search("&password_repetition=");
   let password = stringDataRaw.substring(positionPassword1, positionPassword2);
 
-  let positionPasswordRepition1 = positionPassword2 + "&passwordrepetition=".length;
+  let positionPasswordRepition1 = positionPassword2 + "&password_repetition=".length;
   let positionPasswordRepition2 = stringDataRaw.search("&email=");
   let passwordRepition = stringDataRaw.substring(positionPasswordRepition1, positionPasswordRepition2);
 
@@ -69,7 +69,7 @@ export function  parseFormRegisterData(stringDataRaw) {
   console.log(postalCode);
 
 
-  return {"login_name": loginName, "password": password, "passwordRepition": passwordRepition,
+  return {"login_name": loginName, "password": password, "password_repition": passwordRepition,
           "firstname": firstname, "lastname": lastname, "street": street, "house_number": houseNumber, "postal_code": postalCode,
           "email": email};
 
@@ -87,4 +87,38 @@ export async function makePostRequest(bodyData, headers, hostname, port, path) {
   }
   const response = await resp.text();
   return response;
+}
+
+export function extractPasswordAndTokenFromUrl (url) {
+
+  let loginNamePosition1 = url.search("loginName=") + "loginName=".length;
+  let authTokenPosition1 = url.search("authToken=") + "authToken=".length;
+  let loginNamePosition2;
+  let authTokenPosition2;
+
+  if(loginNamePosition1 < authTokenPosition1) {
+    // Dann kommt der Parameter LoginName in der Url zuerst
+    loginNamePosition2 = url.search("&authToken=");
+    authTokenPosition2 = url.length;
+  } else {
+    //Passwort kommt vor dem Login Namen
+    authTokenPosition2 = url.search("&loginName=");
+    loginNamePosition2 = url.length;
+  }
+
+  let loginName = url.substring(loginNamePosition1, loginNamePosition2);
+  let authToken = url.substring(authTokenPosition1, authTokenPosition2)
+  console.log("ExtractPasswordAndTokenFromUrl: Login Name ist: " + loginName);
+  console.log("ExtractPasswordAndTokenFromUrl: Auth Token ist: " + authToken);
+
+  return {"loginName": loginName, "authToken": authToken};
+}
+
+export async function checkToken (isAdmin, loginName, authToken, host, port) {
+    console.log("CheckToken: LoginName ist: " + loginName);
+    console.log("CheckToken: AuthToken ist: " + authToken);
+    let bodyData = {"login_name": loginName, "auth_token": authToken, "isAdmin": isAdmin};
+    let headerData = { 'Content-Type': 'application/json'};
+    return await makePostRequest(bodyData, headerData, host, port, "/checkAuthUser");
+
 }
