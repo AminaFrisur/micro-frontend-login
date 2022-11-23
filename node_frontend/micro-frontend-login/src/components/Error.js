@@ -1,9 +1,13 @@
 import React from 'react';
 import {Alert, Col} from 'react-bootstrap';
-class ErrorAuth extends React.Component {
+class Error extends React.Component {
 
     constructor(props) {
         super(props);
+        this.state = {
+            errorMessage: ""
+        }
+        if(props.errorMessage) {this.state.errorMessage = props.errorMessage};
     }
 
     render() {
@@ -12,7 +16,7 @@ class ErrorAuth extends React.Component {
                 <br/>
                 <Col md="12">
                     <Alert variant="danger">
-                        Sie haben keinen Zugriff auf diese Seite. Bitte Authentifizieren Sie sich vorher!
+                        Backend meldet folgenden Fehler: {this.state.errorMessage}
                     </Alert>
                 </Col>
                 <br/>
@@ -21,4 +25,4 @@ class ErrorAuth extends React.Component {
     }
 }
 
-export default ErrorAuth;
+export default Error;

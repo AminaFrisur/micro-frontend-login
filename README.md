@@ -25,4 +25,7 @@ Stand 21.11.2022:
 - const response = await resp.text(); -> in fetch request
 - Diese Zeile führt dazu das es langsam ist
 - Warum auch immer
-- 
+
+Stand 23.11.2022:
+- Weitere Anmerkung -> isArray gibt es im Module util irgendwie nicht 
+- ist nicht in Wasm realisierbar anscheinend

@@ -75,12 +75,16 @@ export function  parseFormRegisterData(stringDataRaw) {
 
 }
 
-export async function makePostRequest(bodyData, headers, hostname, port, path) {
-  let parsedBodyData = JSON.stringify(bodyData);
-  console.log("ApiHelper: ParsedBodyData is " + parsedBodyData);
-  console.log("ApiHelper: Make Post Request");
+export async function makeRequest(bodyData, headers, hostname, port, path, method) {
+  let parsedBodyData = null
+  if(method === "POST") {
+    parsedBodyData = JSON.stringify(bodyData);
+    console.log("ApiHelper: ParsedBodyData is " + parsedBodyData);
+  }
+
+  console.log("ApiHelper: Make " + method + " Request");
   console.log("ApiHelper: Request to" + "http://" + hostname + ":" + port + path );
-  let resp = await fetch("http://" + hostname + ":" + port + path, { method: "POST", body: parsedBodyData, headers: headers });
+  let resp = await fetch("http://" + hostname + ":" + port + path, { method: method, body: parsedBodyData, headers: headers });
   console.log("Return Status von Post Request ist " + resp.status);
   if(resp.status != 200) {
     return false;

@@ -3,15 +3,13 @@ import ReactDOMServer from 'react-dom/server';
 import * as std from 'std';
 import * as http from 'wasi_http';
 import * as net from 'wasi_net';
-import {parseFormLoginData, makePostRequest, parseFormRegisterData, checkToken, extractPasswordAndTokenFromUrl} from '../src/utils/ApiHelper.js'
+import {parseFormLoginData, makeRequest, parseFormRegisterData, extractPasswordAndTokenFromUrl} from '../src/ApiHelper.js'
 
 // Import React Komponenten
 import Login from '../src/components/Login.js'
 import Register from '../src/components/Register.js'
-import ErrorAuth from "../src/components/ErrorAuth";
+import Error from "../src/components/Error.js";
 import GetUsersAdmin from "../src/components/GetUsersAdmin";
-
-
 
 async function handle_client(cs) {
     let buffer = new http.Buffer();
@@ -58,7 +56,7 @@ async function handle_req(s, req, parameter) {
 
     } else if (req.uri == '/login' && req.method.toUpperCase() === "POST") {
         let loginData = parseFormLoginData(parameter);
-        let response = await makePostRequest(loginData, { 'Content-Type': 'application/json'}, "localhost", "8000", "/login");
+        let response = await makeRequest(loginData, { 'Content-Type': 'application/json'}, "localhost", "8000", "/login", "POST");
         if(response) {
             contentType = 'text/json; charset=utf-8';
             content = JSON.stringify(response);
@@ -87,7 +85,7 @@ async function handle_req(s, req, parameter) {
 
         } else {
             // Post Request zur Benutzerverwaltung
-            let response = await makePostRequest(registerData, { 'Content-Type': 'application/json'}, "localhost", "8000", "/register");
+            let response = await makeRequest(registerData, { 'Content-Type': 'application/json'}, "localhost", "8000", "/register", "POST");
             if (response) {
                 success=true;
             } else {
@@ -109,17 +107,21 @@ async function handle_req(s, req, parameter) {
 
     else if((req.uri.search('/getUsers?')  == 0) && req.method.toUpperCase() === "GET") {
         // Überprüfe zuerst das Token
+        let app;
         content = std.loadFile('./build/index.html');
         let authParams = extractPasswordAndTokenFromUrl(req.uri);
-        if( await checkToken(true, authParams.loginName, authParams.authToken, "localhost", "8000") ){
-            console.log("GetUsers not failed!")
-            const app = ReactDOMServer.renderToString(<GetUsersAdmin />);
-            content = content.replace('<div id="root"></div>', `<div id="root">${app}</div>`);
+        let response = await makeRequest(null, { 'Content-Type': 'application/json', 'login_name': authParams.loginName, 'auth_token': authParams.authToken},
+                                    "localhost", "8000", "/getUsers", "GET");
+        if(response) {
+            let userList = JSON.parse(response);
+            console.log("TEST USERLIST ARRAY: " + userList[0].id);
+            app = ReactDOMServer.renderToString(<GetUsersAdmin userList={userList} />);
+
         } else {
             console.log("GetUsers failed!");
-            const app = ReactDOMServer.renderToString(<ErrorAuth/>);
-            content = content.replace('<div id="root"></div>', `<div id="root">${app}</div>`);
+            app = ReactDOMServer.renderToString(<Error errorMessage={"Entweder ist der Nutzer nicht authorisiert oder die Abfrage an die Benutzerverwaltung schlug fehl"}/>);
         }
+        content = content.replace('<div id="root"></div>', `<div id="root">${app}</div>`);
     }
 
     else {
