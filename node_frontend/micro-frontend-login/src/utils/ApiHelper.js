@@ -90,6 +90,9 @@ export async function makeRequest(bodyData, headers, hostname, port, path, metho
   if(resp.status != 200) {
     return false;
   }
+
+  // const obj = JSON.parse('{"name":"John", "age":30, "city":"New York"}');
+  // console.log(obj.name);
   const response = await resp.text();
   return response;
 }
@@ -151,25 +154,4 @@ export function checkCookie(req, cache) {
   } else {
     return false;
   }
-}
-
-export function extractInfosFromLoginResponse(resp) {
-  console.log("Api Helper: Login Response ist: " + resp);
-  let positionAuthToken1 = resp.search("auth_token\":\"") + "auth_token:\":\"".length;
-  let positionAuthToken2 = resp.search("\",\"auth_token_timestamp\":");
-  let positionAuthTokenTimestamp1 = positionAuthToken2 + "\",\"auth_token_timestamp\":".length
-  let positionAuthTokenTimestamp2 =  resp.search(",\"is_admin\":")
-  let positionIsAdmin1 = resp.search("is_admin\":") + "is_admin\":".length;
-  // TODO: DAS KÖNNTE EIN PROBLEM SEIN
-  let positionIsAdmin2 = resp.search("}")
-
-  let auth_token = resp.substring(positionAuthToken1, positionAuthToken2);
-  let auth_token_timestamp = resp.substring(positionAuthTokenTimestamp1, positionAuthTokenTimestamp2);
-  let is_admin = resp.substring(positionIsAdmin1, positionIsAdmin2);
-  console.log("Api Helper: Ergebnis der Extraktion ist : " + resp);
-  console.log(auth_token);
-  console.log(auth_token_timestamp);
-  console.log(is_admin);
-
-  return {"auth_token":auth_token, "auth_token_timestamp": auth_token_timestamp, "is_admin": is_admin}
 }

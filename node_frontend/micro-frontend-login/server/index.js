@@ -3,8 +3,9 @@ import ReactDOMServer from 'react-dom/server';
 import * as std from 'std';
 import * as http from 'wasi_http';
 import * as net from 'wasi_net';
-import {parseFormLoginData, makeRequest, parseFormRegisterData, extractPasswordAndTokenFromUrl, extractInfosFromLoginResponse, checkCookie} from '../src/utils/ApiHelper.js'
+import {parseFormLoginData, makeRequest, parseFormRegisterData, extractPasswordAndTokenFromUrl} from '../src/utils/ApiHelper.js'
 import Cache from '../src/utils/cache.js'
+
 // Import React Komponenten
 import Login from '../src/components/Login.js'
 import Register from '../src/components/Register.js'
@@ -68,8 +69,8 @@ async function handle_req(s, req, parameter) {
         if(response) {
             newCookie = true;
             contentType = 'text/json; charset=utf-8;';
-            let authTokenInfos = extractInfosFromLoginResponse(response, cache);
-            authTokenCookie = authTokenInfos.auth_token;
+            let parsedResponse = JSON.parse(response);
+            authTokenCookie = parsedResponse.auth_token;
             loginNameCookie = loginData.login_name;
             // TODO: Render Willkommensseite oder so
             content = "Login war erfolgreich!";
