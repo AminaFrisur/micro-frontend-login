@@ -3,14 +3,15 @@ import ReactDOMServer from 'react-dom/server';
 import * as std from 'std';
 import * as http from 'wasi_http';
 import * as net from 'wasi_net';
-import {parseFormLoginData, makeRequest, parseFormRegisterData, extractPasswordAndTokenFromUrl, extractAuthTokenFromLoginResponse, checkCookie} from '../src/ApiHelper.js'
-
+import {parseFormLoginData, makeRequest, parseFormRegisterData, extractPasswordAndTokenFromUrl, extractInfosFromLoginResponse, checkCookie} from '../src/utils/ApiHelper.js'
+import Cache from '../src/utils/cache.js'
 // Import React Komponenten
 import Login from '../src/components/Login.js'
 import Register from '../src/components/Register.js'
 import Error from "../src/components/Error.js";
 import GetUsersAdmin from "../src/components/GetUsersAdmin";
 
+let cache = new Cache(10000, 2000);
 
 
 async function handle_client(cs) {
@@ -45,8 +46,8 @@ function enlargeArray(oldArr, newLength) {
 async function handle_req(s, req, parameter) {
 
     let newCookie = false;
-    let authToken = null;
-    let loginName = null;
+    let authTokenCookie = null;
+    let loginNameCookie = null;
 
     print('Benutzerverwaltung Micro-Frontend: Uri ist:', req.uri)
     print('Benutzerverwaltung Micro-Frontend: Request Method ist:', req.method)
@@ -67,9 +68,9 @@ async function handle_req(s, req, parameter) {
         if(response) {
             newCookie = true;
             contentType = 'text/json; charset=utf-8;';
-            authToken = extractAuthTokenFromLoginResponse(response)
-            loginName = loginData.login_name;
-            console.log("AUTH TOKEN IST: " + authToken);
+            let authTokenInfos = extractInfosFromLoginResponse(response, cache);
+            authTokenCookie = authTokenInfos.auth_token;
+            loginNameCookie = loginData.login_name;
             // TODO: Render Willkommensseite oder so
             content = "Login war erfolgreich!";
 
@@ -120,7 +121,7 @@ async function handle_req(s, req, parameter) {
     else if((req.uri.search('/getUsers?')  == 0) && req.method.toUpperCase() === "GET") {
         // Überprüfe zuerst das Token
 
-        checkCookie(req);
+        // checkCookie(req);
 
         let app;
         content = std.loadFile('./build/index.html');
@@ -181,7 +182,7 @@ async function handle_req(s, req, parameter) {
         console.log("Benutzerverwaltung Micro-Frontend: Es wurde ein neues Auth Token erstellt, setze somit neuen Cookie")
         resp.headers = {
             'Content-Type': contentType,
-            'Set-Cookie': "auth_token=" + authToken + "; login_name=" + loginName
+            'Set-Cookie': "auth_token=" + authTokenCookie + "; login_name=" + loginNameCookie
         }
         console.log(JSON.stringify(resp.headers));
     };

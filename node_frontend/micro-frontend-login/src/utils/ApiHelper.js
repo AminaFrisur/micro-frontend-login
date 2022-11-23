@@ -1,4 +1,5 @@
 import {fetch} from "http";
+import Cache from './cache.js';
 
 export function  parseFormLoginData(stringDataRaw) {
 
@@ -126,26 +127,49 @@ export function extractAuthTokenFromCookie(cookies) {
 
 export function extractLoginNameFromCookie(cookies) {
   let position1 = cookies.search("login_name=") + "login_name=".length;
+  let position2 = cookies.search("; is_admin=");
+  return cookies.substring(position1, position2);
+}
+
+export function extractIsAdminFromCookie(cookies) {
+  let position1 = cookies.search("is_admin=") + "is_admin=".length;
   let position2 = cookies.length
   return cookies.substring(position1, position2);
 }
 
-export function checkCookie(req) {
+export function checkCookie(req, cache) {
   console.log(JSON.stringify(req.headers));
   if (req.headers && "cookie" in req.headers) {
     console.log("Api Helper: Cookies sind im Request Header vorhanden: " + req.headers["cookie"]);
     let auth_token = extractAuthTokenFromCookie(req.headers["cookie"]);
     let login_name = extractLoginNameFromCookie(req.headers["cookie"]);
-    console.log(auth_token);
-    console.log(login_name);
-    return true;
+    let isAdmin = extractIsAdminFromCookie(req.headers["cookie"]);
+
+    // Schritt 1: Prüfe ob Token im Cache
+    let userCacheIndex = cache.getUserIndex(login_name);
+    return cache.checkToken(userCacheIndex, login_name, isAdmin)
   } else {
     return false;
   }
 }
 
-export function extractAuthTokenFromLoginResponse(resp) {
-  let position1 = resp.search("auth_token\":\"") + "auth_token:\":".length;
-  let position2 = resp.search("\"\}");
-  return resp.substring(position1, position2);
+export function extractInfosFromLoginResponse(resp) {
+  console.log("Api Helper: Login Response ist: " + resp);
+  let positionAuthToken1 = resp.search("auth_token\":\"") + "auth_token:\":\"".length;
+  let positionAuthToken2 = resp.search("\",\"auth_token_timestamp\":");
+  let positionAuthTokenTimestamp1 = positionAuthToken2 + "\",\"auth_token_timestamp\":".length
+  let positionAuthTokenTimestamp2 =  resp.search(",\"is_admin\":")
+  let positionIsAdmin1 = resp.search("is_admin\":") + "is_admin\":".length;
+  // TODO: DAS KÖNNTE EIN PROBLEM SEIN
+  let positionIsAdmin2 = resp.search("}")
+
+  let auth_token = resp.substring(positionAuthToken1, positionAuthToken2);
+  let auth_token_timestamp = resp.substring(positionAuthTokenTimestamp1, positionAuthTokenTimestamp2);
+  let is_admin = resp.substring(positionIsAdmin1, positionIsAdmin2);
+  console.log("Api Helper: Ergebnis der Extraktion ist : " + resp);
+  console.log(auth_token);
+  console.log(auth_token_timestamp);
+  console.log(is_admin);
+
+  return {"auth_token":auth_token, "auth_token_timestamp": auth_token_timestamp, "is_admin": is_admin}
 }

@@ -37,3 +37,4 @@ Stand 23.11.2022:
 - Möglich durch Cookies:
 - "When receiving an HTTP Request, a server can send a Set-Cookie header with response"
 - Mit jedem neuen Request zum Server, sendet der Browser alle seine vorher gespeicherten Cookies zum Server
+- Weitere Anmerkung: Aus irgendeinem Grund funktioniert JSON Parse nicht -> keine Ahnung warum
