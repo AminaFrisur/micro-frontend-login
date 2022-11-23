@@ -29,3 +29,11 @@ Stand 21.11.2022:
 Stand 23.11.2022:
 - Weitere Anmerkung -> isArray gibt es im Module util irgendwie nicht 
 - ist nicht in Wasm realisierbar anscheinend
+- Aktuelles Problem noch:
+- Das abspeichern des Authentifizierungs Token für die Nutzung
+- Auf Client Seite -> Einfach die Nutzung von window.localStorage -> Hier wird dann erst die Authentifizierung durchgeführt, wenn eine Seite schon geladen wurde
+- Sprich -> Landing Page wird geladen -> Authentifizierung wird abgefragt -> Wenn nicht authentifiziert -> LAden von Login -> Ansonsten andere Komponente!
+- Aber: Was ist wenn wir das Authentifizierungstoken mit jeder Anfrage an den Server weiterleiten, damit er authentifizierte Anfragen im Namen unserer Benutzer stellen könnte?
+- Möglich durch Cookies:
+- "When receiving an HTTP Request, a server can send a Set-Cookie header with response"
+- Mit jedem neuen Request zum Server, sendet der Browser alle seine vorher gespeicherten Cookies zum Server

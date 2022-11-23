@@ -83,7 +83,7 @@ export async function makeRequest(bodyData, headers, hostname, port, path, metho
   }
 
   console.log("ApiHelper: Make " + method + " Request");
-  console.log("ApiHelper: Request to" + "http://" + hostname + ":" + port + path );
+  console.log("ApiHelper: Request to " + "http://" + hostname + ":" + port + path );
   let resp = await fetch("http://" + hostname + ":" + port + path, { method: method, body: parsedBodyData, headers: headers });
   console.log("Return Status von Post Request ist " + resp.status);
   if(resp.status != 200) {
@@ -118,11 +118,34 @@ export function extractPasswordAndTokenFromUrl (url) {
   return {"loginName": loginName, "authToken": authToken};
 }
 
-export async function checkToken (isAdmin, loginName, authToken, host, port) {
-    console.log("CheckToken: LoginName ist: " + loginName);
-    console.log("CheckToken: AuthToken ist: " + authToken);
-    let bodyData = {"login_name": loginName, "auth_token": authToken, "isAdmin": isAdmin};
-    let headerData = { 'Content-Type': 'application/json'};
-    return await makePostRequest(bodyData, headerData, host, port, "/checkAuthUser");
+export function extractAuthTokenFromCookie(cookies) {
+  let position1 = cookies.search("auth_token=") + "auth_token=".length;
+  let position2 = cookies.search("; login_name=");
+  return cookies.substring(position1, position2);
+}
 
+export function extractLoginNameFromCookie(cookies) {
+  let position1 = cookies.search("login_name=") + "login_name=".length;
+  let position2 = cookies.length
+  return cookies.substring(position1, position2);
+}
+
+export function checkCookie(req) {
+  console.log(JSON.stringify(req.headers));
+  if (req.headers && "cookie" in req.headers) {
+    console.log("Api Helper: Cookies sind im Request Header vorhanden: " + req.headers["cookie"]);
+    let auth_token = extractAuthTokenFromCookie(req.headers["cookie"]);
+    let login_name = extractLoginNameFromCookie(req.headers["cookie"]);
+    console.log(auth_token);
+    console.log(login_name);
+    return true;
+  } else {
+    return false;
+  }
+}
+
+export function extractAuthTokenFromLoginResponse(resp) {
+  let position1 = resp.search("auth_token\":\"") + "auth_token:\":".length;
+  let position2 = resp.search("\"\}");
+  return resp.substring(position1, position2);
 }
