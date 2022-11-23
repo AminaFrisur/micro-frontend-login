@@ -10,8 +10,8 @@ import Cache from '../src/utils/cache.js'
 import Login from '../src/components/Login.js'
 import Register from '../src/components/Register.js'
 import Error from "../src/components/Error.js";
-import GetUsersAdmin from "../src/components/GetUsersAdmin";
-
+import GetUsersAdmin from "../src/components/GetUsersAdmin.js";
+import Welcome from "../src/components/Welcome.js";
 let cache = new Cache(10000, 2000);
 
 
@@ -64,22 +64,23 @@ async function handle_req(s, req, parameter) {
         content = content.replace('<div id="root"></div>', `<div id="root">${app}</div>`);
 
     } else if (req.uri == '/login' && req.method.toUpperCase() === "POST") {
+        let app;
         let loginData = parseFormLoginData(parameter);
         let response = await makeRequest(loginData, { 'Content-Type': 'application/json'}, "localhost", "8000", "/login", "POST");
         if(response) {
             newCookie = true;
-            contentType = 'text/json; charset=utf-8;';
             let parsedResponse = JSON.parse(response);
             authTokenCookie = parsedResponse.auth_token;
             loginNameCookie = loginData.login_name;
-            // TODO: Render Willkommensseite oder so
             content = "Login war erfolgreich!";
+            app = ReactDOMServer.renderToString(<Welcome />);
 
         } else {
-            const app = ReactDOMServer.renderToString(<Login error={true} />);
-            content = std.loadFile('./build/index.html');
-            content = content.replace('<div id="root"></div>', `<div id="root"><p>${app}</p></div>`);
+            app = ReactDOMServer.renderToString(<Login error={true} />);
+
         }
+        content = std.loadFile('./build/index.html');
+        content = content.replace('<div id="root"></div>', `<div id="root"><p>${app}</p></div>`);
 
     } else if (req.uri == '/register' && req.method.toUpperCase() === "GET") {
         const app = ReactDOMServer.renderToString(<Register />);
