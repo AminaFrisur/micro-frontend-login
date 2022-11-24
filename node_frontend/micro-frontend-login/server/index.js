@@ -3,7 +3,7 @@ import ReactDOMServer from 'react-dom/server';
 import * as std from 'std';
 import * as http from 'wasi_http';
 import * as net from 'wasi_net';
-import {parseFormLoginData, makeRequest, parseFormRegisterData, extractPasswordAndTokenFromUrl} from '../src/utils/ApiHelper.js'
+import {parseFormLoginData, makeRequest, parseFormRegisterData, parseCookies, checkCookies} from '../src/utils/ApiHelper.js'
 import Cache from '../src/utils/cache.js'
 
 // Import React Komponenten
@@ -14,6 +14,8 @@ import GetUsersAdmin from "../src/components/GetUsersAdmin.js";
 import Welcome from "../src/components/Welcome.js";
 let cache = new Cache(10000, 2000);
 
+let benutzerVerwaltungMsHost = "localhost";
+let benutzerVerwaltungMsPort = "8000";
 
 async function handle_client(cs) {
     let buffer = new http.Buffer();
@@ -66,10 +68,15 @@ async function handle_req(s, req, parameter) {
     } else if (req.uri == '/login' && req.method.toUpperCase() === "POST") {
         let app;
         let loginData = parseFormLoginData(parameter);
-        let response = await makeRequest(loginData, { 'Content-Type': 'application/json'}, "localhost", "8000", "/login", "POST");
+        let response = await makeRequest(loginData, { 'Content-Type': 'application/json'}, benutzerVerwaltungMsHost, benutzerVerwaltungMsPort, "/login", "POST");
         if(response) {
             newCookie = true;
             let parsedResponse = JSON.parse(response);
+            let index = cache.getUserIndex(loginData.login_name);
+
+            console.log("TTTTTTTTEEEEEEESSSSSSTT: " + parsedResponse.auth_token)
+
+            cache.updateOrInsertCachedUser(index, loginData.login_name, parsedResponse.auth_token, parsedResponse.auth_token_timestamp, parsedResponse.is_admin);
             authTokenCookie = parsedResponse.auth_token;
             loginNameCookie = loginData.login_name;
             content = "Login war erfolgreich!";
@@ -100,7 +107,7 @@ async function handle_req(s, req, parameter) {
 
         } else {
             // Post Request zur Benutzerverwaltung
-            let response = await makeRequest(registerData, { 'Content-Type': 'application/json'}, "localhost", "8000", "/register", "POST");
+            let response = await makeRequest(registerData, { 'Content-Type': 'application/json'}, benutzerVerwaltungMsHost, benutzerVerwaltungMsPort, "/register", "POST");
             if (response) {
                 success=true;
             } else {
@@ -121,24 +128,28 @@ async function handle_req(s, req, parameter) {
     }
 
     else if((req.uri.search('/getUsers?')  == 0) && req.method.toUpperCase() === "GET") {
-        // Überprüfe zuerst das Token
-
-        // checkCookie(req);
-
         let app;
-        content = std.loadFile('./build/index.html');
-        let authParams = extractPasswordAndTokenFromUrl(req.uri);
-        let response = await makeRequest(null, { 'Content-Type': 'application/json', 'login_name': authParams.loginName, 'auth_token': authParams.authToken},
-                                    "localhost", "8000", "/getUsers", "GET");
-        if(response) {
-            let userList = JSON.parse(response);
-            console.log("TEST USERLIST ARRAY: " + userList[0].id);
-            app = ReactDOMServer.renderToString(<GetUsersAdmin userList={userList} />);
+        let cookieList = parseCookies(req.headers["cookie"]);
+        console.log("COOKELISTE GEHOLT");
+        if(await checkCookies(cookieList, cache, true, benutzerVerwaltungMsHost, benutzerVerwaltungMsPort)) {
 
+            console.log("CHECK COOKIE WAR ERFOLGREICH");
+
+            content = std.loadFile('./build/index.html');
+            let response = await makeRequest(null, { 'Content-Type': 'application/json', 'login_name': cookieList.login_name, 'auth_token': cookieList.auth_token},
+                benutzerVerwaltungMsHost, benutzerVerwaltungMsPort, "/getUsers", "GET");
+            if(response) {
+                let userList = JSON.parse(response);
+                app = ReactDOMServer.renderToString(<GetUsersAdmin userList={userList} />);
+
+            } else {
+                app = ReactDOMServer.renderToString(<Error errorMessage={"Entweder ist der Nutzer nicht authorisiert oder die Abfrage an die Benutzerverwaltung schlug fehl"}/>);
+            }
+            content = content.replace('<div id="root"></div>', `<div id="root">${app}</div>`);
         } else {
-            console.log("GetUsers failed!");
             app = ReactDOMServer.renderToString(<Error errorMessage={"Entweder ist der Nutzer nicht authorisiert oder die Abfrage an die Benutzerverwaltung schlug fehl"}/>);
         }
+        content = std.loadFile('./build/index.html');
         content = content.replace('<div id="root"></div>', `<div id="root">${app}</div>`);
     }
 
@@ -182,9 +193,10 @@ async function handle_req(s, req, parameter) {
     if(newCookie) {
 
         console.log("Benutzerverwaltung Micro-Frontend: Es wurde ein neues Auth Token erstellt, setze somit neuen Cookie")
+        console.log("LOGINNAMECOOKIE IST " + loginNameCookie);
         resp.headers = {
             'Content-Type': contentType,
-            'Set-Cookie': "auth_token=" + authTokenCookie + "; login_name=" + loginNameCookie
+            'Set-Cookie': "auth_token=" + authTokenCookie + ", login_name=" + loginNameCookie +", new=test"
         }
         console.log(JSON.stringify(resp.headers));
     };

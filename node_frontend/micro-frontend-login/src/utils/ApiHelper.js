@@ -8,11 +8,8 @@ export function  parseFormLoginData(stringDataRaw) {
   let position2 = stringDataRaw.search("&password=");
   let position3 = position2 + 10;
   let position4 = stringDataRaw.length;
-  console.log(position4);
   let loginName = stringDataRaw.substring(position1, position2);
-  let password = stringDataRaw.substring(position3, position4)
-  console.log(loginName);
-  console.log(password);
+  let password = stringDataRaw.substring(position3, position4);
   return {"login_name": loginName, "password": password};
 
 }
@@ -89,69 +86,49 @@ export async function makeRequest(bodyData, headers, hostname, port, path, metho
   console.log("Return Status von Post Request ist " + resp.status);
   if(resp.status != 200) {
     return false;
-  }
-
-  // const obj = JSON.parse('{"name":"John", "age":30, "city":"New York"}');
-  // console.log(obj.name);
+  };
   const response = await resp.text();
   return response;
 }
 
-export function extractPasswordAndTokenFromUrl (url) {
-
-  let loginNamePosition1 = url.search("loginName=") + "loginName=".length;
-  let authTokenPosition1 = url.search("authToken=") + "authToken=".length;
-  let loginNamePosition2;
-  let authTokenPosition2;
-
-  if(loginNamePosition1 < authTokenPosition1) {
-    // Dann kommt der Parameter LoginName in der Url zuerst
-    loginNamePosition2 = url.search("&authToken=");
-    authTokenPosition2 = url.length;
-  } else {
-    //Passwort kommt vor dem Login Namen
-    authTokenPosition2 = url.search("&loginName=");
-    loginNamePosition2 = url.length;
+export function parseCookies(cookieHeaders) {
+  console.log("COOOKIES SIND: " + cookieHeaders);
+  const list = {};
+  if (cookieHeaders) {
+    cookieHeaders.split(`,`).forEach(function(cookie) {
+      let [ name, ...rest] = cookie.split(`=`);
+      name = name.trim();
+      if (!name) return;
+      const value = rest.join(`=`).trim();
+      if (!value) return;
+      list[name] = decodeURIComponent(value);
+    });
   }
 
-  let loginName = url.substring(loginNamePosition1, loginNamePosition2);
-  let authToken = url.substring(authTokenPosition1, authTokenPosition2)
-  console.log("ExtractPasswordAndTokenFromUrl: Login Name ist: " + loginName);
-  console.log("ExtractPasswordAndTokenFromUrl: Auth Token ist: " + authToken);
-
-  return {"loginName": loginName, "authToken": authToken};
+  return list;
 }
 
-export function extractAuthTokenFromCookie(cookies) {
-  let position1 = cookies.search("auth_token=") + "auth_token=".length;
-  let position2 = cookies.search("; login_name=");
-  return cookies.substring(position1, position2);
-}
 
-export function extractLoginNameFromCookie(cookies) {
-  let position1 = cookies.search("login_name=") + "login_name=".length;
-  let position2 = cookies.search("; is_admin=");
-  return cookies.substring(position1, position2);
-}
-
-export function extractIsAdminFromCookie(cookies) {
-  let position1 = cookies.search("is_admin=") + "is_admin=".length;
-  let position2 = cookies.length
-  return cookies.substring(position1, position2);
-}
-
-export function checkCookie(req, cache) {
-  console.log(JSON.stringify(req.headers));
-  if (req.headers && "cookie" in req.headers) {
-    console.log("Api Helper: Cookies sind im Request Header vorhanden: " + req.headers["cookie"]);
-    let auth_token = extractAuthTokenFromCookie(req.headers["cookie"]);
-    let login_name = extractLoginNameFromCookie(req.headers["cookie"]);
-    let isAdmin = extractIsAdminFromCookie(req.headers["cookie"]);
-
-    // Schritt 1: Prüfe ob Token im Cache
-    let userCacheIndex = cache.getUserIndex(login_name);
-    return cache.checkToken(userCacheIndex, login_name, isAdmin)
-  } else {
+export async function checkCookies(cookieList, cache, isAdmin, host, port) {
+  if(cookieList.login_name == undefined || cookieList.auth_token == undefined) {
     return false;
   }
+
+  let userCacheIndex = cache.getUserIndex(cookieList.login_name);
+  if(userCacheIndex < 0) {
+    // Das Token ist zwar in den Cookie Headern vorhanden, aber nicht im Cache gespeichert
+    // Deshalb checkAuthUser von MS Benutzerverwaltung aufrufen aufrufen
+    let response = await makeRequest({"login_name": cookieList.login_name, "auth_token": cookieList.auth_token, "isAdmin": isAdmin},
+        { 'Content-Type': 'application/json'}, host, port,
+        "/checkAuthUser", "POST");
+    let parsedResponse = JSON.parse(response);
+    if(!response) {return false};
+    cache.updateOrInsertCachedUser(userCacheIndex, cookieList.login_name, cookieList.auth_token,
+        parsedResponse.auth_token_timestamp, parsedResponse.is_admin);
+    return true;
+
+  } else {
+    return cache.checkToken(userCacheIndex, cookieList.auth_token, isAdmin);
+  }
+
 }
