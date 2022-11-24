@@ -1,75 +1,52 @@
 import {fetch} from "http";
-import Cache from './cache.js';
+
+function parseFormData(stringDataRaw) {
+
+  console.log(stringDataRaw);
+
+  try{
+    let formData = stringDataRaw.split(/\r?\n/);
+
+    let result = {};
+    if (formData) {
+      formData[formData.length - 1].split(`&`).forEach(function(item) {
+        let [ name, ...rest] = item.split(`=`);
+        name = name.trim();
+        if (!name) return;
+        const value = rest.join(`=`).trim();
+        if (!value) return;
+        result[name] = decodeURIComponent(value);
+      });
+    }
+    return result;
+  } catch (e) {
+    console.log(e);
+    return false
+  }
+}
+
 
 export function  parseFormLoginData(stringDataRaw) {
-
-  // Hole dir aus dem Form Request die Nutzerdaten für den Login
-  let position1 = stringDataRaw.search("loginName=") + 10;
-  let position2 = stringDataRaw.search("&password=");
-  let position3 = position2 + 10;
-  let position4 = stringDataRaw.length;
-  let loginName = stringDataRaw.substring(position1, position2);
-  let password = stringDataRaw.substring(position3, position4);
-  return {"login_name": loginName, "password": password};
-
+    let result = parseFormData(stringDataRaw);
+    console.log(result.login_name);
+    if(result) {
+      return {"login_name": result.login_name, "password": result.password};
+    } else {
+      return {}
+    }
 }
 
 export function  parseFormRegisterData(stringDataRaw) {
 
-  // Hole dir aus dem Form Request die Nutzerdaten für die Registrierung
-  let positionLogin1 = stringDataRaw.search("login_name=") + "login_name=".length;
-  let positionLogin2 = stringDataRaw.search("&password=");
-  let loginName = stringDataRaw.substring(positionLogin1, positionLogin2);
+  let result = parseFormData(stringDataRaw);
+  if(result) {
+    return {"login_name": result.login_name, "password": result.password, "password_repition": result.password_repition,
+            "firstname": result.firstname, "lastname": result.lastname, "street": result.street, "house_number": result.house_number, "postal_code": result.postal_code,
+            "email": result.email};
 
-  let positionPassword1 = positionLogin2 + "&password=".length;
-  let positionPassword2 = stringDataRaw.search("&password_repetition=");
-  let password = stringDataRaw.substring(positionPassword1, positionPassword2);
-
-  let positionPasswordRepition1 = positionPassword2 + "&password_repetition=".length;
-  let positionPasswordRepition2 = stringDataRaw.search("&email=");
-  let passwordRepition = stringDataRaw.substring(positionPasswordRepition1, positionPasswordRepition2);
-
-  let positionEmail1 = positionPasswordRepition2 + "&email=".length;
-  let positionEmail2 = stringDataRaw.search("&firstname=");
-  let email = stringDataRaw.substring(positionEmail1, positionEmail2);
-
-  let positionFirstname1 = positionEmail2 + "&firstname=".length;
-  let positionFirstname2 = stringDataRaw.search("&lastname=");
-  let firstname = stringDataRaw.substring(positionFirstname1, positionFirstname2);
-
-  let positionLastname1 = positionFirstname2 + "&lastname=".length;
-  let positionLastname2 = stringDataRaw.search("&street=");
-  let lastname = stringDataRaw.substring(positionLastname1, positionLastname2);
-
-  let positionStreet1 = positionLastname2 + "&street=".length;
-  let positionStreet2 = stringDataRaw.search("&house_number=");
-  let street = stringDataRaw.substring(positionStreet1, positionStreet2);
-
-  let positionHouseNumber1 = positionStreet2 + "&house_number=".length;
-  let positionHouseNumber2 = stringDataRaw.search("&postal_code=");
-  let houseNumber = stringDataRaw.substring(positionHouseNumber1, positionHouseNumber2);
-
-  let positionPostalCode1 = positionHouseNumber2 + "&postal_code=".length;
-  let positionPostalCode2 = stringDataRaw.length
-  let postalCode = stringDataRaw.substring(positionPostalCode1, positionPostalCode2);
-
-  email = email.replace("%40", "@");
-  street = street.replaceAll("+", " ");
-
-  console.log(loginName);
-  console.log(password);
-  console.log(passwordRepition)
-  console.log(email);
-  console.log(firstname);
-  console.log(lastname);
-  console.log(street);
-  console.log(houseNumber);
-  console.log(postalCode);
-
-
-  return {"login_name": loginName, "password": password, "password_repition": passwordRepition,
-          "firstname": firstname, "lastname": lastname, "street": street, "house_number": houseNumber, "postal_code": postalCode,
-          "email": email};
+  } else {
+    return {}
+  }
 
 }
 
@@ -92,7 +69,6 @@ export async function makeRequest(bodyData, headers, hostname, port, path, metho
 }
 
 export function parseCookies(cookieHeaders) {
-  console.log("COOOKIES SIND: " + cookieHeaders);
   const list = {};
   if (cookieHeaders) {
     cookieHeaders.split(`,`).forEach(function(cookie) {

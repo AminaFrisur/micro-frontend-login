@@ -73,9 +73,6 @@ async function handle_req(s, req, parameter) {
             newCookie = true;
             let parsedResponse = JSON.parse(response);
             let index = cache.getUserIndex(loginData.login_name);
-
-            console.log("TTTTTTTTEEEEEEESSSSSSTT: " + parsedResponse.auth_token)
-
             cache.updateOrInsertCachedUser(index, loginData.login_name, parsedResponse.auth_token, parsedResponse.auth_token_timestamp, parsedResponse.is_admin);
             authTokenCookie = parsedResponse.auth_token;
             loginNameCookie = loginData.login_name;

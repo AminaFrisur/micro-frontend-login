@@ -43,7 +43,7 @@ class Register extends React.Component {
                     <Form.Group>
                         <Col md="12">
                             <Form.Label>Login Name</Form.Label>
-                            <Form.Control type="text" name="login_name" placeholder="Bitte geben Sie einen Login Namen ein"/>
+                            <Form.Control type="text" name="login_name" value={this.props.login_name} placeholder="Bitte geben Sie einen Login Namen ein"/>
                             <small className="form-text text-muted">Bitte wählen Sie ihren Login Namen mit bedacht. Dieser ist später nicht veränderbar und sollte auch Eindeutig sein</small>
                         </Col>
                     </Form.Group>
@@ -51,21 +51,21 @@ class Register extends React.Component {
                     <Form.Group>
                         <Col md="12">
                             <Form.Label>Passwort</Form.Label>
-                            <Form.Control type="password" name="password" placeholder="Bitte geben Sie Ihr Passwort ein" required/>
+                            <Form.Control type="password" name="password" value={this.props.password} placeholder="Bitte geben Sie Ihr Passwort ein" required/>
                         </Col>
                     </Form.Group>
                     <br/>
                     <Form.Group>
                         <Col md="12">
                             <Form.Label>Wiederholung Passwort</Form.Label>
-                            <Form.Control type="password" name="password_repition" placeholder="Bitte wiederholen Sie Ihr Passwort" required/>
+                            <Form.Control type="password" name="password_repition" value={this.props.password_repition} placeholder="Bitte wiederholen Sie Ihr Passwort" required/>
                         </Col>
                     </Form.Group>
                     <br/>
                     <Form.Group>
                         <Col md="12">
                             <Form.Label>E-Mail</Form.Label>
-                            <Form.Control type="email" name="email" placeholder="Bitte geben Sie eine E-Mail Adresse an" required/>
+                            <Form.Control type="email" name="email" value={this.props.email} placeholder="Bitte geben Sie eine E-Mail Adresse an" required/>
                             <small className="form-text text-muted">Im Gegensatz zum Login Namen ist die E-Mail Adresse später änderbar</small>
                         </Col>
                     </Form.Group>
@@ -73,35 +73,35 @@ class Register extends React.Component {
                     <Form.Group>
                         <Col md="12">
                             <Form.Label>Vorname</Form.Label>
-                            <Form.Control type="text" name="firstname" placeholder="Bitte geben Sie Ihren Vornamen an"/>
+                            <Form.Control type="text" name="firstname" value={this.props.firstname} placeholder="Bitte geben Sie Ihren Vornamen an"/>
                         </Col>
                     </Form.Group>
                     <br/>
                     <Form.Group>
                         <Col md="12">
                             <Form.Label>Nachname</Form.Label>
-                            <Form.Control type="text" name="lastname" placeholder="Bitte geben Sie Ihren Nachnamen an" required/>
+                            <Form.Control type="text" name="lastname" value={this.props.lastname} placeholder="Bitte geben Sie Ihren Nachnamen an" required/>
                         </Col>
                     </Form.Group>
                     <br/>
                     <Form.Group>
                         <Col md="12">
                             <Form.Label>Straße</Form.Label>
-                            <Form.Control type="text" name="street" placeholder="Bitte wiederholen Sie die Straße Ihrer Wohnadresse an" required/>
+                            <Form.Control type="text" name="street" value={this.props.street} placeholder="Bitte wiederholen Sie die Straße Ihrer Wohnadresse an" required/>
                         </Col>
                     </Form.Group>
                     <br/>
                     <Form.Group>
                         <Col md="12">
                             <Form.Label>Hausnummer</Form.Label>
-                            <Form.Control type="number" name="house_number" placeholder="Bitte wiederholen Sie die Hausnummer Ihrer Wohnadresse an" required/>
+                            <Form.Control type="number" name="house_number" value={this.props.house_number} placeholder="Bitte wiederholen Sie die Hausnummer Ihrer Wohnadresse an" required/>
                         </Col>
                     </Form.Group>
                     <br/>
                     <Form.Group>
                         <Col md="12">
                             <Form.Label>Postleitzahl</Form.Label>
-                            <Form.Control type="number" name="postal_code" placeholder="Bitte wiederholen Sie die PLZ Ihrer Wohnadresse an" required/>
+                            <Form.Control type="number" name="postal_code" value={this.props.postal_code} placeholder="Bitte wiederholen Sie die PLZ Ihrer Wohnadresse an" required/>
                         </Col>
                     </Form.Group>
                     <br/>

@@ -12,7 +12,6 @@ class Login extends React.Component {
         if(props.error) {
             this.state.error = true;
         }
-
     }
 
     render() {
@@ -26,7 +25,7 @@ class Login extends React.Component {
                     <Form.Group>
                         <Col md="12">
                             <Form.Label>Login Name</Form.Label>
-                            <Form.Control type="text" name="loginName" placeholder="Bitte geben Sie ihren Login Namen ein"/>
+                            <Form.Control type="text" name="login_name" placeholder="Bitte geben Sie ihren Login Namen ein"/>
                         </Col>
                     </Form.Group>
                     <br/>
