@@ -58,11 +58,10 @@ async function handle_req(s, req, parameter) {
     let contentType = '';
 
     let resp = new http.WasiResponse();
-    let content = '';
+    let content = std.loadFile('./build/index.html');
 
     if (req.uri == '/login' && req.method.toUpperCase() === "GET") {
         const app = ReactDOMServer.renderToString(<Login />);
-        content = std.loadFile('./build/index.html');
         content = content.replace('<div id="root"></div>', `<div id="root">${app}</div>`);
 
     } else if (req.uri == '/login' && req.method.toUpperCase() === "POST") {
@@ -76,19 +75,16 @@ async function handle_req(s, req, parameter) {
             cache.updateOrInsertCachedUser(index, loginData.login_name, parsedResponse.auth_token, parsedResponse.auth_token_timestamp, parsedResponse.is_admin);
             authTokenCookie = parsedResponse.auth_token;
             loginNameCookie = loginData.login_name;
-            content = "Login war erfolgreich!";
             app = ReactDOMServer.renderToString(<Welcome />);
 
         } else {
             app = ReactDOMServer.renderToString(<Login error={true} />);
 
         }
-        content = std.loadFile('./build/index.html');
         content = content.replace('<div id="root"></div>', `<div id="root"><p>${app}</p></div>`);
 
     } else if (req.uri == '/register' && req.method.toUpperCase() === "GET") {
         const app = ReactDOMServer.renderToString(<Register />);
-        content = std.loadFile('./build/index.html');
         content = content.replace('<div id="root"></div>', `<div id="root">${app}</div>`);
 
     } else if (req.uri == '/register' && req.method.toUpperCase() === "POST") {
@@ -120,19 +116,13 @@ async function handle_req(s, req, parameter) {
                                                             street={registerData.street} house_number={registerData.house_number}
                                                             postal_code={registerData.postal_code}
         />);
-        content = std.loadFile('./build/index.html');
         content = content.replace('<div id="root"></div>', `<div id="root">${app}</div>`);
     }
 
     else if((req.uri.search('/getUsers?')  == 0) && req.method.toUpperCase() === "GET") {
         let app;
         let cookieList = parseCookies(req.headers["cookie"]);
-        console.log("COOKELISTE GEHOLT");
         if(await checkCookies(cookieList, cache, true, benutzerVerwaltungMsHost, benutzerVerwaltungMsPort)) {
-
-            console.log("CHECK COOKIE WAR ERFOLGREICH");
-
-            content = std.loadFile('./build/index.html');
             let response = await makeRequest(null, { 'Content-Type': 'application/json', 'login_name': cookieList.login_name, 'auth_token': cookieList.auth_token},
                 benutzerVerwaltungMsHost, benutzerVerwaltungMsPort, "/getUsers", "GET");
             if(response) {
@@ -146,8 +136,9 @@ async function handle_req(s, req, parameter) {
         } else {
             app = ReactDOMServer.renderToString(<Error errorMessage={"Entweder ist der Nutzer nicht authorisiert oder die Abfrage an die Benutzerverwaltung schlug fehl"}/>);
         }
-        content = std.loadFile('./build/index.html');
         content = content.replace('<div id="root"></div>', `<div id="root">${app}</div>`);
+
+        resp.status = 401
     }
 
     else {
