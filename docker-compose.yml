@@ -15,6 +15,24 @@ services:
       - service
       - architecture
 
+  rest-api-frontend-login2:
+    container_name: rest-api-frontend-login2
+    build: ./frontend
+    platform: wasi/wasm32
+    runtime: io.containerd.wasmedge.v1
+    networks:
+      - service
+      - architecture
+
+  rest-api-frontend-login3:
+    container_name: rest-api-frontend-login3
+    build: ./frontend
+    platform: wasi/wasm32
+    runtime: io.containerd.wasmedge.v1
+    networks:
+      - service
+      - architecture
+
   api-gateway-frontend-login:
     container_name: api-gateway-frontend-login
     build: ./api_gateway
@@ -25,5 +43,5 @@ services:
       - 8101:80
     depends_on:
       - rest-api-frontend-login1
-    # - rest-api-frontend-login2
-    # - rest-api-frontend-login3
+      - rest-api-frontend-login2
+      - rest-api-frontend-login3

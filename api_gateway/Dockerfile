@@ -1,4 +1,4 @@
 FROM nginx:1.23.2
-LABEL description="Api Gateway for Microservice Benutzerverwaltung with NGINX"
+LABEL description="Api Gateway for Micro-Frontend Login with NGINX"
 RUN rm /etc/nginx/conf.d/default.conf
 COPY ./config/nginx.conf /etc/nginx/conf.d/default.conf
