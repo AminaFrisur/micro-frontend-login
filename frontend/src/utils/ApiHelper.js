@@ -69,6 +69,7 @@ export async function makeRequest(bodyData, headers, hostname, port, path, metho
 }
 
 export function parseCookies(cookieHeaders) {
+  console.log("COOKIEHEADERS SIND: " + cookieHeaders);
   const list = {};
   if (cookieHeaders) {
     cookieHeaders.split(`,`).forEach(function(cookie) {
@@ -108,3 +109,19 @@ export async function checkCookies(cookieList, cache, isAdmin, host, port) {
   }
 
 }
+
+export function parseFormDataUrl(headers) {
+  // let formDataUrl = "";
+  let parsedHeaderInfomrations = headers.split(/\r?\n/);
+  let formDataInformation = parsedHeaderInfomrations[parsedHeaderInfomrations.length - 1];
+  console.log(formDataInformation)
+  try {
+    return JSON.parse(formDataInformation);
+  } catch (e) {
+    return false
+  }
+
+}
+
+
+

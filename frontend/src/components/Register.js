@@ -39,7 +39,7 @@ class Register extends React.Component {
             <div>
                 <h1>Register into application</h1>
                 <br/>
-                <Form action="http://localhost:8002/register" method="post">
+                <Form action="http://localhost:8100/register" method="post">
                     <Form.Group>
                         <Col md="12">
                             <Form.Label>Login Name</Form.Label>

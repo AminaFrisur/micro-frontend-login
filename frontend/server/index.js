@@ -119,7 +119,7 @@ async function handle_req(s, req, parameter) {
         content = content.replace('<div id="root"></div>', `<div id="root">${app}</div>`);
     }
 
-    else if((req.uri.search('/getUsers?')  == 0) && req.method.toUpperCase() === "GET") {
+    else if(req.uri =='/getUsers' && req.method.toUpperCase() === "GET") {
         let app;
         let cookieList = parseCookies(req.headers["cookie"]);
         if(await checkCookies(cookieList, cache, true, benutzerVerwaltungMsHost, benutzerVerwaltungMsPort)) {
@@ -131,14 +131,15 @@ async function handle_req(s, req, parameter) {
 
             } else {
                 app = ReactDOMServer.renderToString(<Error errorMessage={"Entweder ist der Nutzer nicht authorisiert oder die Abfrage an die Benutzerverwaltung schlug fehl"}/>);
+                resp.status = 401
             }
+
             content = content.replace('<div id="root"></div>', `<div id="root">${app}</div>`);
         } else {
+            resp.status = 401
             app = ReactDOMServer.renderToString(<Error errorMessage={"Entweder ist der Nutzer nicht authorisiert oder die Abfrage an die Benutzerverwaltung schlug fehl"}/>);
         }
         content = content.replace('<div id="root"></div>', `<div id="root">${app}</div>`);
-
-        resp.status = 401
     }
 
     else {
@@ -181,7 +182,6 @@ async function handle_req(s, req, parameter) {
     if(newCookie) {
 
         console.log("Benutzerverwaltung Micro-Frontend: Es wurde ein neues Auth Token erstellt, setze somit neuen Cookie")
-        console.log("LOGINNAMECOOKIE IST " + loginNameCookie);
         resp.headers = {
             'Content-Type': contentType,
             'Set-Cookie': "auth_token=" + authTokenCookie + ", login_name=" + loginNameCookie +", new=test"
@@ -194,9 +194,9 @@ async function handle_req(s, req, parameter) {
 }
 
 async function server_start() {
-    print('listen 8002...');
+    print('listen 8100...');
     try {
-        let s = new net.WasiTcpServer(8002);
+        let s = new net.WasiTcpServer(8100);
         for (var i = 0; ; i++) {
             let cs = await s.accept();
             handle_client(cs);

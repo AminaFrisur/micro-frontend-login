@@ -6,12 +6,10 @@ class Login extends React.Component {
         super(props);
 
         this.state = {
-            error : false
+            error : false,
         };
 
-        if(props.error) {
-            this.state.error = true;
-        }
+        if(props.error) {this.state.error = error;}
     }
 
     render() {
@@ -19,7 +17,7 @@ class Login extends React.Component {
             <div>
                 <h1>Login into application</h1>
                 <br/>
-                <Form action="http://localhost:8002/login"
+                <Form action="/login"
                       method="post">
 
                     <Form.Group>

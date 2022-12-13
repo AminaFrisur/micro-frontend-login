@@ -1,0 +1,29 @@
+
+networks:
+  service:
+    name: micro-frontend-login-service-main
+  architecture:
+    name: main
+
+services:
+  rest-api-frontend-login1:
+    container_name: rest-api-frontend-login1
+    build: ./frontend
+    platform: wasi/wasm32
+    runtime: io.containerd.wasmedge.v1
+    networks:
+      - service
+      - architecture
+
+  api-gateway-frontend-login:
+    container_name: api-gateway-frontend-login
+    build: ./api_gateway
+    networks:
+      - service
+      - architecture
+    ports:
+      - 8101:80
+    depends_on:
+      - rest-api-frontend-login1
+    # - rest-api-frontend-login2
+    # - rest-api-frontend-login3
